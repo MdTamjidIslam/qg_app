@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:twitter_app/screen/videos.dart';
 
+import 'brothel.dart';
+import 'earn.dart';
 import 'home.dart';
+import 'live.dart';
 
 class TopNavScaffold extends StatefulWidget {
   const TopNavScaffold({super.key});
@@ -24,27 +28,27 @@ class _TopNavScaffoldState extends State<TopNavScaffold> {
     _TabMeta(
 
       label: '视频',
-      inactive: Icons.play_circle_outline,
-      active: Icons.play_circle_filled_rounded,
-      page:  _DemoPage(title: '青楼 · Favorites'),
+      inactive: Icons.videocam_sharp,
+      active: Icons.videocam_outlined,
+      page:  VideosPage(),
     ),
     _TabMeta(
       label: '青楼',
       inactive: Icons.favorite_border,
       active: Icons.favorite,
-      page: const _DemoPage(title: '青楼 · Favorites'),
+      page: BrothelPage(),
     ),
     _TabMeta(
       label: '直播',
       inactive: Icons.live_tv_outlined,
       active: Icons.live_tv,
-      page: const _DemoPage(title: '直播 · Live'),
+      page: LivePage(),
     ),
     _TabMeta(
       label: '赚钱',
       inactiveWidget: const _TicketIcon(),
       activeWidget: const _TicketIcon(active: true),
-      page: const _DemoPage(title: '赚钱 · Earn'),
+      page: EarnPage(),
     ),
   ];
 
@@ -65,7 +69,7 @@ class _TopNavScaffoldState extends State<TopNavScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    final activeColor = Color(0xFFFF6DAF);
+    final activeColor = Color(0xFFFF34D3);
     const inactiveColor = Colors.grey;
 
     return Scaffold(
@@ -162,7 +166,7 @@ class _TicketIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = active ? Color(0xFFFF6DAF) : Colors.grey;
+    final Color color = active ? Color(0xFFFF34D3) : Colors.grey;
     return SizedBox(
       width: 28,
       height: 28,
