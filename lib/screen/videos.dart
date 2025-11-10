@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../providers/apiList_provider.dart';
 import '../providers/banner_provider.dart';
 import '../providers/recommended_provider.dart';
+import 'details_screen.dart';
 
 /// ===================== COLORS (Single brand color: #FF34D3) =====================
 const kPink = Color(0xFFFF34D3);
@@ -372,7 +373,19 @@ class _MiniTile extends StatelessWidget {
         Text(title,style: TextStyle(fontSize: 8,color: Colors.black),),
         const SizedBox(height: 4),
         GestureDetector(
-          onTap: onTap,
+            onTap: (){
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => DetailPage(
+                    title: title,              // <-- title pass
+                    images: [icon],            // <-- 1+ image pass (এখানে ১টা)
+                    description: '',           // (ঐচ্ছিক) আপনি চাইলে টেক্সট দিন
+                    ctaText: ' 点击下载 进入色情专区',
+                  ),
+                ),
+              );
+          },
           child: Container(
             height: 24, width: 64, alignment: Alignment.center,
             decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: kPink, width: 1.2)),
@@ -391,25 +404,83 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const double h = 42;        // height
+    const double r = 8;         // border radius
+
     return Container(
-      height: 38,
-      margin: const EdgeInsets.symmetric(horizontal: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      height: h,
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color: Colors.white,
-        border: Border.all(color: kDivider),
+        borderRadius: BorderRadius.circular(r),
+        border: Border.all(color: const Color(0xFFECECEC)),
       ),
-      child: Row(
-        children: [
-          Container(width: 6, height: 16, decoration: BoxDecoration(color: kPink, borderRadius: BorderRadius.circular(4))),
-          const SizedBox(width: 8),
-          Text(cn, style: const TextStyle(color: kTextMain, fontSize: 16, fontWeight: FontWeight.w800)),
-          const SizedBox(width: 8),
-          Text(en, style: const TextStyle(color: kTextSub, fontSize: 12, fontWeight: FontWeight.w600)),
-          const Spacer(),
-          Container(width: 64, height: 6, decoration: BoxDecoration(color: Color(0xFFF2F2F7), borderRadius: BorderRadius.circular(20))),
-        ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(r),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Gradient background (hot pink -> soft pink -> white fade)
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    Color(0xFFFF4FD3), // hot pink
+                    Color(0xFFFF7FE3), // soft pink
+                    Color(0x00FFFFFF), // fade to transparent (right)
+                  ],
+                  stops: [0.0, 0.65, 1.0],
+                ),
+              ),
+            ),
+
+
+            // Text row
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                children: [
+                  // left bright edge (thin highlight)
+                  Container(
+                    width: 3, height: 18,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(.85),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+
+                  // CN title (white, bold)
+                  Text(
+                    cn,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      shadows: [Shadow(color: Color(0x33000000), blurRadius: 2, offset: Offset(0,1))],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+
+                  // EN subtitle (white, semi)
+                  Text(
+                    en.toUpperCase(),
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(.9),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: .5,
+                      shadows: const [Shadow(color: Color(0x22000000), blurRadius: 1)],
+                    ),
+                  ),
+
+                  const Spacer(),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -483,10 +554,25 @@ class _RecommendedTile extends StatelessWidget {
               Text(item.sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: kTextSub, fontSize: 12)),
             ]),
           ),
-          Container(
-            height: 26, width: 72, alignment: Alignment.center,
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: kPink, width: 1.2)),
-            child: const Text('下载', style: TextStyle(color: kPink, fontWeight: FontWeight.w700, fontSize: 12)),
+          InkWell(
+            onTap: (){
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => DetailPage(
+                    title: item.title,              // <-- title pass
+                    images: [item.icon],            // <-- 1+ image pass (এখানে ১টা)
+                    description: item.sub,           // (ঐচ্ছিক) আপনি চাইলে টেক্সট দিন
+                    ctaText: ' 点击下载 进入色情专区',
+                  ),
+                ),
+              );
+            },
+            child: Container(
+              height: 26, width: 72, alignment: Alignment.center,
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: kPink, width: 1.2)),
+              child: const Text('下载', style: TextStyle(color: kPink, fontWeight: FontWeight.w700, fontSize: 12)),
+            ),
           ),
         ],
       ),
@@ -551,24 +637,39 @@ class _DatingCard extends StatelessWidget {
   final _DatingItem item; const _DatingCard({required this.item});
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(borderRadius: BorderRadius.circular(14), child: Stack(children: [
-      AspectRatio(aspectRatio: 3/4, child: CachedNetworkImage(
-        imageUrl: item.photo, fit: BoxFit.cover,
-        placeholder: (_, __) => Shimmer(child: Container(color: const Color(0xFFF2F2F7))),
-        errorWidget: (_, __, ___) => Shimmer(child: Container(color: const Color(0xFFF2F2F7))),
-      )),
-      Positioned.fill(child: DecoratedBox(decoration: BoxDecoration(
-        gradient: LinearGradient(begin: Alignment.bottomCenter, end: Alignment.center, colors: [Colors.black.withOpacity(.55), Colors.transparent]),
-      ))),
-      Positioned(left: 10, bottom: 10, child: Row(children: [
-        Text(item.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14)),
-        const SizedBox(width: 6),
-        Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          decoration: BoxDecoration(color: kPinkDeep, borderRadius: BorderRadius.circular(6)),
-          child: Text(item.badge, style: const TextStyle(color: Colors.white, fontSize: 10)),
-        )
-      ])),
-    ]));
+    return ClipRRect(borderRadius: BorderRadius.circular(14), child: InkWell(
+      onTap: (){
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => DetailPage(
+              title: item.name,              // <-- title pass
+              images: [item.photo],            // <-- 1+ image pass (এখানে ১টা)
+              description: '',           // (ঐচ্ছিক) আপনি চাইলে টেক্সট দিন
+              ctaText: ' 点击下载 进入色情专区',
+            ),
+          ),
+        );
+      },
+      child: Stack(children: [
+        AspectRatio(aspectRatio: 3/4, child: CachedNetworkImage(
+          imageUrl: item.photo, fit: BoxFit.cover,
+          placeholder: (_, __) => Shimmer(child: Container(color: const Color(0xFFF2F2F7))),
+          errorWidget: (_, __, ___) => Shimmer(child: Container(color: const Color(0xFFF2F2F7))),
+        )),
+        Positioned.fill(child: DecoratedBox(decoration: BoxDecoration(
+          gradient: LinearGradient(begin: Alignment.bottomCenter, end: Alignment.center, colors: [Colors.black.withOpacity(.55), Colors.transparent]),
+        ))),
+        Positioned(left: 10, bottom: 10, child: Row(children: [
+          Text(item.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14)),
+          const SizedBox(width: 6),
+          Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(color: kPinkDeep, borderRadius: BorderRadius.circular(6)),
+            child: Text(item.badge, style: const TextStyle(color: Colors.white, fontSize: 10)),
+          )
+        ])),
+      ]),
+    ));
   }
 }
 

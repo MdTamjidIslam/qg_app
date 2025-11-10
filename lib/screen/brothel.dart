@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-import '../providers/apiList_provider.dart'; // <-- DatingZoneProvider এখানে আছে ধরে নিলাম
+import '../providers/apiList_provider.dart';
+import 'details_screen.dart'; // <-- DatingZoneProvider এখানে আছে ধরে নিলাম
 
 /// ===================== BRAND COLORS =====================
 const kPink       = Color(0xFFFF34D3);
@@ -152,17 +153,32 @@ class _DatingCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             child: AspectRatio(
               aspectRatio: 3 / 4,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  CachedNetworkImage(
-                    imageUrl: item.photo,
-                    fit: BoxFit.cover,
-                    placeholder: (_, __) => Shimmer(child: Container(color: const Color(0xFFF2F2F7))),
-                    errorWidget:  (_, __, ___) => Shimmer(child: Container(color: const Color(0xFFF2F2F7))),
-                  ),
-                  Positioned(left: 8, top: 8, child: _TopBadge(text: item.badge)),
-                ],
+              child: InkWell(
+                onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => DetailPage(
+                        title: item.name,              // <-- title pass
+                        images: [item.photo],            // <-- 1+ image pass (এখানে ১টা)
+                        description: item.badge,           // (ঐচ্ছিক) আপনি চাইলে টেক্সট দিন
+                        ctaText: ' 点击下载 进入色情专区',
+                      ),
+                    ),
+                  );
+                },
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    CachedNetworkImage(
+                      imageUrl: item.photo,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => Shimmer(child: Container(color: const Color(0xFFF2F2F7))),
+                      errorWidget:  (_, __, ___) => Shimmer(child: Container(color: const Color(0xFFF2F2F7))),
+                    ),
+                    Positioned(left: 8, top: 8, child: _TopBadge(text: item.badge)),
+                  ],
+                ),
               ),
             ),
           ),
