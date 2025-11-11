@@ -374,17 +374,17 @@ class _MiniTile extends StatelessWidget {
         const SizedBox(height: 4),
         GestureDetector(
             onTap: (){
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => DetailPage(
-                    title: title,              // <-- title pass
-                    images: [icon],            // <-- 1+ image pass (এখানে ১টা)
-                    description: '',           // (ঐচ্ছিক) আপনি চাইলে টেক্সট দিন
-                    ctaText: ' 点击下载 进入色情专区',
-                  ),
-                ),
-              );
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (_) => DetailPage(
+              //       title: title,              // <-- title pass
+              //       images: [icon],            // <-- 1+ image pass (এখানে ১টা)
+              //       description: '',           // (ঐচ্ছিক) আপনি চাইলে টেক্সট দিন
+              //       ctaText: ' 点击下载 进入色情专区',
+              //     ),
+              //   ),
+              // );
           },
           child: Container(
             height: 24, width: 64, alignment: Alignment.center,
@@ -556,17 +556,17 @@ class _RecommendedTile extends StatelessWidget {
           ),
           InkWell(
             onTap: (){
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => DetailPage(
-                    title: item.title,              // <-- title pass
-                    images: [item.icon],            // <-- 1+ image pass (এখানে ১টা)
-                    description: item.sub,           // (ঐচ্ছিক) আপনি চাইলে টেক্সট দিন
-                    ctaText: ' 点击下载 进入色情专区',
-                  ),
-                ),
-              );
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (_) => DetailPage(
+              //       title: item.title,              // <-- title pass
+              //       images: [item.icon],            // <-- 1+ image pass (এখানে ১টা)
+              //       description: item.sub,           // (ঐচ্ছিক) আপনি চাইলে টেক্সট দিন
+              //       ctaText: ' 点击下载 进入色情专区',
+              //     ),
+              //   ),
+              // );
             },
             child: Container(
               height: 26, width: 72, alignment: Alignment.center,
@@ -639,17 +639,17 @@ class _DatingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(borderRadius: BorderRadius.circular(14), child: InkWell(
       onTap: (){
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => DetailPage(
-              title: item.name,              // <-- title pass
-              images: [item.photo],            // <-- 1+ image pass (এখানে ১টা)
-              description: '',           // (ঐচ্ছিক) আপনি চাইলে টেক্সট দিন
-              ctaText: ' 点击下载 进入色情专区',
-            ),
-          ),
-        );
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (_) => DetailPage(
+        //       title: item.name,              // <-- title pass
+        //       images: [item.photo],            // <-- 1+ image pass (এখানে ১টা)
+        //       description: '',           // (ঐচ্ছিক) আপনি চাইলে টেক্সট দিন
+        //       ctaText: ' 点击下载 进入色情专区',
+        //     ),
+        //   ),
+        // );
       },
       child: Stack(children: [
         AspectRatio(aspectRatio: 3/4, child: CachedNetworkImage(

@@ -28,6 +28,13 @@ android {
         targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        // ⬇️ OpenInstall placeholders (এইখানে দিন)
+        manifestPlaceholders.putAll(
+            mapOf(
+                "OPENINSTALL_APPKEY" to "i44ctk", // কনসোল থেকে নেয়া AppKey
+                "OPENINSTALL_SCHEME" to "yourappscheme"            // আপনার কাস্টম scheme (a–z, 0–9, . - _)
+            )
+        )
     }
 
     buildTypes {

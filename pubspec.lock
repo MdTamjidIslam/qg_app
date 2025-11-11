@@ -232,6 +232,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  openinstall_flutter_plugin:
+    dependency: "direct main"
+    description:
+      name: openinstall_flutter_plugin
+      sha256: "510f8f418fe4eb6d342a9f772e129cae4f45e9d7d9f39baf1ac322a059928c1b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.5.6"
   path:
     dependency: transitive
     description:

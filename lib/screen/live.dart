@@ -149,17 +149,17 @@ class _DatingCard extends StatelessWidget {
               aspectRatio: 3 / 4,
               child: InkWell(
                 onTap: (){
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => DetailPage(
-                        title: item.name,              // <-- title pass
-                        images: [item.photo],            // <-- 1+ image pass (এখানে ১টা)
-                        description: item.badge,           // (ঐচ্ছিক) আপনি চাইলে টেক্সট দিন
-                        ctaText: ' 点击下载 进入色情专区',
-                      ),
-                    ),
-                  );
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (_) => DetailPage(
+                  //       title: item.name,              // <-- title pass
+                  //       images: [item.photo],            // <-- 1+ image pass (এখানে ১টা)
+                  //       description: item.badge,           // (ঐচ্ছিক) আপনি চাইলে টেক্সট দিন
+                  //       ctaText: ' 点击下载 进入色情专区',
+                  //     ),
+                  //   ),
+                  // );
                 },
 
                 child: Stack(

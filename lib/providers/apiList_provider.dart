@@ -35,16 +35,16 @@ class OtherItem {
 
 class OtherProvider extends ChangeNotifier {
   final String api = 'http://172.16.16.253/dynamic_flutter/public/api/v1/other';
-
   final List<OtherItem> _items = [];
   bool _loading = false;
   String? _error;
-
   List<OtherItem> get items => List.unmodifiable(_items);
   bool get loading => _loading;
   String? get error => _error;
 
   Future<void> fetch({bool force = false}) async {
+    print(api);
+    print('ldldlll 000000000');
     if (_loading) return;
     if (_items.isNotEmpty && !force) return;
 
