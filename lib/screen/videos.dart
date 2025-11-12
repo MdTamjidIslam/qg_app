@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../providers/apiList_provider.dart';
 import '../providers/banner_provider.dart';
 import '../providers/recommended_provider.dart';
+import 'detail_fetch_page.dart';
 import 'details_screen.dart';
 
 /// ===================== COLORS (Single brand color: #FF34D3) =====================
@@ -336,11 +337,31 @@ class AppMiniGridFromApi extends StatelessWidget {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 5, mainAxisSpacing: 14, crossAxisSpacing: 12, mainAxisExtent: 100),
-          itemBuilder: (_, i) {
+            crossAxisCount: 5,
+            mainAxisSpacing: 14,
+            crossAxisSpacing: 12,
+            mainAxisExtent: 100,
+          ),
+          itemBuilder: (context, i) {
             final it = p.items[i];
             final target = it.androidUrl.isNotEmpty ? it.androidUrl : it.webUrl;
-            return _MiniTile(icon: it.img, title: it.name, onTap: () => _open(target));
+
+            return _MiniTile(
+              icon: it.img,
+              title: it.name,
+              // ইমেজ/টাইটেল ট্যাপ করলে → ডিটেইল ফেচ পেজে index সহ যাবে
+              onTapDetail: () {
+                print('clicked kori');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DetailsPage(type: 'recommended', index: i),
+                  ),
+                );
+              },
+              // বাটন ট্যাপ করলে → ওপেন/ডাউনলোড
+              onTapDownload: () => _open(target),
+            );
           },
         );
       },
@@ -351,45 +372,63 @@ class AppMiniGridFromApi extends StatelessWidget {
 class _MiniTile extends StatelessWidget {
   final String icon;
   final String title;
-  final VoidCallback? onTap;
-  const _MiniTile({required this.icon, required this.title, this.onTap});
+  final VoidCallback? onTapDetail;   // image/title → detail
+  final VoidCallback? onTapDownload; // button → open/download
+
+  const _MiniTile({
+    required this.icon,
+    required this.title,
+    this.onTapDetail,
+    this.onTapDownload,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // ইমেজে ট্যাপ করলে ডিটেইলে যাবে
         Expanded(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: CachedNetworkImage(
-              imageUrl: icon,
-              fit: BoxFit.cover,
-              placeholder: (_, __) => const _RoundedBox(),
-              errorWidget: (_, __, ___) => const _RoundedBox(),
+            child: InkWell(
+              onTap: onTapDetail,
+              child: CachedNetworkImage(
+                imageUrl: icon,
+                fit: BoxFit.cover,
+                placeholder: (_, __) => const _RoundedBox(),
+                errorWidget:   (_, __, ___) => const _RoundedBox(),
+              ),
             ),
           ),
         ),
         const SizedBox(height: 4),
-        Text(title,style: TextStyle(fontSize: 8,color: Colors.black),),
-        const SizedBox(height: 4),
+        // টাইটেলেও ট্যাপ করলে ডিটেইল
         GestureDetector(
-            onTap: (){
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (_) => DetailPage(
-              //       title: title,              // <-- title pass
-              //       images: [icon],            // <-- 1+ image pass (এখানে ১টা)
-              //       description: '',           // (ঐচ্ছিক) আপনি চাইলে টেক্সট দিন
-              //       ctaText: ' 点击下载 进入色情专区',
-              //     ),
-              //   ),
-              // );
-          },
+          onTap: onTapDetail,
+          child: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 8, color: Colors.black),
+          ),
+        ),
+        const SizedBox(height: 4),
+        // 下载 বাটন → ডাউনলোড/ওপেন
+        GestureDetector(
+          onTap: onTapDetail,
           child: Container(
-            height: 24, width: 64, alignment: Alignment.center,
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: kPink, width: 1.2)),
-            child: const Text('下载', style: TextStyle(color: kPink, fontWeight: FontWeight.w700, fontSize: 12)),
+            height: 24,
+            width: 64,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: kPink, width: 1.2),
+            ),
+            child: const Text(
+              '下载',
+              style: TextStyle(color: kPink, fontWeight: FontWeight.w700, fontSize: 12),
+            ),
           ),
         ),
       ],
@@ -491,6 +530,8 @@ class OtherSectionFromApi extends StatelessWidget {
   const OtherSectionFromApi({super.key});
 
   Future<void> _open(String url) async {
+    print(url);
+    print('1111111 others');
     if (url.isEmpty) return;
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
@@ -507,22 +548,44 @@ class OtherSectionFromApi extends StatelessWidget {
         }
         return Column(
           children: [
-            for (final it in p.items)
+            for (int i = 0; i < p.items.length; i++)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 child: GestureDetector(
-                  onTap: () => _open(it.androidUrl.isNotEmpty ? it.androidUrl : it.webUrl),
+                  onTap: () => _open(
+                      p.items[i].androidUrl.isNotEmpty ? p.items[i].androidUrl : p.items[i].webUrl
+                  ),
                   child: _RecommendedTile(
                     item: _RecommendItem(
-                      icon: it.img,
-                      title: it.name,
-                      sub: (it.slogan.isEmpty ? '私密可靠 · 真实有效' : it.slogan),
+                      icon: p.items[i].img,
+                      title: p.items[i].name,
+                      sub: (p.items[i].slogan.isEmpty ? '私密可靠 · 真实有效' : p.items[i].slogan),
                     ),
+                    index: i, // <-- নতুন
                   ),
                 ),
               ),
           ],
         );
+
+        // return Column(
+        //   children: [
+        //     for (final it in p.items)
+        //       Padding(
+        //         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        //         child: GestureDetector(
+        //           onTap: () => _open(it.androidUrl.isNotEmpty ? it.androidUrl : it.webUrl),
+        //           child: _RecommendedTile(
+        //             item: _RecommendItem(
+        //               icon: it.img,
+        //               title: it.name,
+        //               sub: (it.slogan.isEmpty ? '私密可靠 · 真实有效' : it.slogan),
+        //             ),
+        //           ),
+        //         ),
+        //       ),
+        //   ],
+        // );
       },
     );
   }
@@ -530,56 +593,72 @@ class OtherSectionFromApi extends StatelessWidget {
 
 class _RecommendedTile extends StatelessWidget {
   final _RecommendItem item;
-  const _RecommendedTile({required this.item});
+  final int index; // <-- নতুন
+
+  const _RecommendedTile({required this.item, required this.index});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(color: kCard, borderRadius: BorderRadius.circular(12), border: Border.all(color: kDivider)),
-      padding: const EdgeInsets.all(10),
-      child: Row(
-        children: [
-          ClipRRect(borderRadius: BorderRadius.circular(8),
-            child: CachedNetworkImage(imageUrl: item.icon, width: 56, height: 56, fit: BoxFit.cover,
-              placeholder: (_, __) => const SkeletonBox(h: 56, w: 56, r: 8),
-              errorWidget: (_, __, ___) => const SkeletonBox(h: 56, w: 56, r: 8),
+    return InkWell(
+      onTap: (){
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => DetailsPage(type: 'other', index: index), // <-- এখানে index
+          ),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(color: kCard, borderRadius: BorderRadius.circular(12), border: Border.all(color: kDivider)),
+        padding: const EdgeInsets.all(10),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: CachedNetworkImage(
+                imageUrl: item.icon, width: 56, height: 56, fit: BoxFit.cover,
+                placeholder: (_, __) => const SkeletonBox(h: 56, w: 56, r: 8),
+                errorWidget: (_, __, ___) => const SkeletonBox(h: 56, w: 56, r: 8),
+              ),
             ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: kTextMain, fontSize: 15, fontWeight: FontWeight.w800)),
-              const SizedBox(height: 4),
-              Text(item.sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: kTextSub, fontSize: 12)),
-            ]),
-          ),
-          InkWell(
-            onTap: (){
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (_) => DetailPage(
-              //       title: item.title,              // <-- title pass
-              //       images: [item.icon],            // <-- 1+ image pass (এখানে ১টা)
-              //       description: item.sub,           // (ঐচ্ছিক) আপনি চাইলে টেক্সট দিন
-              //       ctaText: ' 点击下载 进入色情专区',
-              //     ),
-              //   ),
-              // );
-            },
-            child: Container(
-              height: 26, width: 72, alignment: Alignment.center,
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: kPink, width: 1.2)),
-              child: const Text('下载', style: TextStyle(color: kPink, fontWeight: FontWeight.w700, fontSize: 12)),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: kTextMain, fontSize: 15, fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 4),
+                  Text(item.sub, maxLines: 1, overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: kTextSub, fontSize: 12)),
+                ],
+              ),
             ),
-          ),
-        ],
+            InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DetailsPage(type: 'other', index: index), // <-- এখানে index
+                  ),
+                );
+              },
+              child: Container(
+                height: 26, width: 72, alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: kPink, width: 1.2),
+                ),
+                child: const Text('下载', style: TextStyle(color: kPink, fontWeight: FontWeight.w700, fontSize: 12)),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
-
 /// ===================== Two-col grid helper =====================
 class _TwoColGrid extends StatelessWidget {
   final List<Widget> children;
@@ -616,17 +695,19 @@ class DatingZoneSectionFromApi extends StatelessWidget {
         if (p.items.isEmpty) {
           return const _DatingSkeleton(count: 4);
         }
-        final items = <_DatingItem>[];
-        for (int i = 0; i < p.items.length; i++) {
-          final it = p.items[i];
-          final badge = (it.slogan.isNotEmpty) ? it.slogan : '${120 + i * 7}人约过';
-          items.add(_DatingItem(name: it.name, photo: it.img, badge: badge));
-        }
 
         return _TwoColGrid(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           spacing: 12,
-          children: items.map((e) => _DatingCard(item: e)).toList(),
+          // ✅ index রাখার জন্য List.generate ব্যবহার
+          children: List.generate(p.items.length, (i) {
+            final it = p.items[i];
+            final badge = (it.slogan.isNotEmpty) ? it.slogan : '${120 + i * 7}人约过';
+            return _DatingCard(
+              index: i, // <-- index পাঠানো হলো
+              item: _DatingItem(name: it.name, photo: it.img, badge: badge),
+            );
+          }),
         );
       },
     );
@@ -634,42 +715,72 @@ class DatingZoneSectionFromApi extends StatelessWidget {
 }
 
 class _DatingCard extends StatelessWidget {
-  final _DatingItem item; const _DatingCard({required this.item});
+  final int index;              // <-- নতুন: index রিসিভ করব
+  final _DatingItem item;
+
+  const _DatingCard({
+    super.key,
+    required this.index,
+    required this.item,
+  });
+
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(borderRadius: BorderRadius.circular(14), child: InkWell(
-      onTap: (){
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (_) => DetailPage(
-        //       title: item.name,              // <-- title pass
-        //       images: [item.photo],            // <-- 1+ image pass (এখানে ১টা)
-        //       description: '',           // (ঐচ্ছিক) আপনি চাইলে টেক্সট দিন
-        //       ctaText: ' 点击下载 进入色情专区',
-        //     ),
-        //   ),
-        // );
-      },
-      child: Stack(children: [
-        AspectRatio(aspectRatio: 3/4, child: CachedNetworkImage(
-          imageUrl: item.photo, fit: BoxFit.cover,
-          placeholder: (_, __) => Shimmer(child: Container(color: const Color(0xFFF2F2F7))),
-          errorWidget: (_, __, ___) => Shimmer(child: Container(color: const Color(0xFFF2F2F7))),
-        )),
-        Positioned.fill(child: DecoratedBox(decoration: BoxDecoration(
-          gradient: LinearGradient(begin: Alignment.bottomCenter, end: Alignment.center, colors: [Colors.black.withOpacity(.55), Colors.transparent]),
-        ))),
-        Positioned(left: 10, bottom: 10, child: Row(children: [
-          Text(item.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14)),
-          const SizedBox(width: 6),
-          Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(color: kPinkDeep, borderRadius: BorderRadius.circular(6)),
-            child: Text(item.badge, style: const TextStyle(color: Colors.white, fontSize: 10)),
-          )
-        ])),
-      ]),
-    ));
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: () {
+          // ✅ এখানেই সঠিক index যাবে
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => DatingZoneDetailsPage(
+                type: 'dating-zone',
+                index: index, // <-- এখানে index ইউজ করলাম
+              ),
+            ),
+          );
+        },
+        child: Stack(children: [
+          AspectRatio(
+            aspectRatio: 3 / 4,
+            child: CachedNetworkImage(
+              imageUrl: item.photo,
+              fit: BoxFit.cover,
+              placeholder: (_, __) => Shimmer(child: Container(color: const Color(0xFFF2F2F7))),
+              errorWidget:  (_, __, ___) => Shimmer(child: Container(color: const Color(0xFFF2F2F7))),
+            ),
+          ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.center,
+                  colors: [Colors.black.withOpacity(.55), Colors.transparent],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 10,
+            bottom: 10,
+            child: Row(children: [
+              Text(
+                item.name,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14),
+              ),
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(color: kPinkDeep, borderRadius: BorderRadius.circular(6)),
+                child: Text(item.badge, style: const TextStyle(color: Colors.white, fontSize: 10)),
+              ),
+            ]),
+          ),
+        ]),
+      ),
+    );
   }
 }
 

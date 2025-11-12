@@ -100,28 +100,27 @@ class _DatingSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final p = context.watch<DatingZoneProvider>();
-    // Provider item → local model
-    final items = <_DatingItem>[];
-    for (int i = 0; i < p.items.length; i++) {
-      final it = p.items[i];
-      final badge = (it.slogan.isNotEmpty) ? it.slogan : '49人约过';
-      items.add(_DatingItem(name: it.name, photo: it.img, badge: badge));
-    }
-
     return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const _SectionTitle(cn: '同城约会', en: 'DATING ZONE'),
-          const SizedBox(height: 10),
-          _TwoColGrid(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Consumer<DatingZoneProvider>(
+        builder: (_, p, __) {
+          if (p.items.isEmpty) {
+            return const _DatingSkeleton(count: 4);
+          }
+      
+          return _TwoColGrid(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
             spacing: 12,
-            children: items.map((e) => _DatingCard(item: e)).toList(),
-          ),
-          const SizedBox(height: 12),
-        ],
+            // ✅ index রাখার জন্য List.generate ব্যবহার
+            children: List.generate(p.items.length, (i) {
+              final it = p.items[i];
+              final badge = (it.slogan.isNotEmpty) ? it.slogan : '${120 + i * 7}人约过';
+              return _DatingCard(
+                index: i, // <-- index পাঠানো হলো
+                item: _DatingItem(name: it.name, photo: it.img, badge: badge),
+              );
+            }),
+          );
+        },
       ),
     );
   }
@@ -129,8 +128,10 @@ class _DatingSection extends StatelessWidget {
 
 /// ===================== CARD (match the screenshot) =====================
 class _DatingCard extends StatelessWidget {
+  final int index;
   final _DatingItem item;
-  const _DatingCard({required this.item});
+  const _DatingCard({
+  required this.index,required this.item});
 
   @override
   Widget build(BuildContext context) {
@@ -155,6 +156,15 @@ class _DatingCard extends StatelessWidget {
               aspectRatio: 3 / 4,
               child: InkWell(
                 onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => DatingZoneDetailsPage(
+                        type: 'dating-zone',
+                        index: index, // <-- এখানে index ইউজ করলাম
+                      ),
+                    ),
+                  );
                   // Navigator.push(
                   //   context,
                   //   MaterialPageRoute(
