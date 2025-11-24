@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-/// API base: http://172.16.16.253/dynamic_flutter/public/api/v1/details/{type}/{index}
+/// API base: http://172.16.16.241/dynamic_flutter/public/api/v1/details/{type}/{index}
 const String kDetailsBase =
-    'http://172.16.16.253/dynamic_flutter/public/api/v1/details';
+    'http://172.16.16.241/dynamic_flutter/public/api/v1/details';
 
 class DetailsData {
   final String name;

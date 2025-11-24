@@ -26,7 +26,7 @@ class RecommendedItem {
 
 class RecommendedProvider extends ChangeNotifier {
   final String api =
-      'http://172.16.16.253/dynamic_flutter/public/api/v1/recommended';
+      'http://172.16.16.241/dynamic_flutter/public/api/v1/recommended';
 
   final List<RecommendedItem> _items = [];
   bool _loading = false;

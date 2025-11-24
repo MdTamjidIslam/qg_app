@@ -34,7 +34,7 @@ class OtherItem {
 }
 
 class OtherProvider extends ChangeNotifier {
-  final String api = 'http://172.16.16.253/dynamic_flutter/public/api/v1/other';
+  final String api = 'http://172.16.16.241/dynamic_flutter/public/api/v1/other';
   final List<OtherItem> _items = [];
   bool _loading = false;
   String? _error;
@@ -109,7 +109,7 @@ class DatingZoneApiItem {
 }
 
 class DatingZoneProvider extends ChangeNotifier {
-  final String api = 'http://172.16.16.253/dynamic_flutter/public/api/v1/dating-zone';
+  final String api = 'http://172.16.16.241/dynamic_flutter/public/api/v1/dating-zone';
 
   final List<DatingZoneApiItem> _items = [];
   bool _loading = false;

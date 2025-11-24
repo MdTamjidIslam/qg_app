@@ -88,7 +88,7 @@ class _VideosPageState extends State<VideosPage> {
     super.didChangeDependencies();
     if (!_fetched) {
       // NOTE: Providers must be created above (e.g., in main.dart -> MultiProvider).
-      context.read<BannerProvider>().fetch();
+      context.read<BannerProvider>().loadFromConfigAndFetch();
       context.read<AnnouncementsProvider>().fetch(force: true);
       context.read<RecommendedProvider>().fetch();
       context.read<OtherProvider>().fetch();

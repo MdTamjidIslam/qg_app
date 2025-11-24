@@ -90,7 +90,7 @@ class _HomePageState extends State<HomePage> {
     super.didChangeDependencies();
     if (!_fetched) {
       // NOTE: Providers must be created above (e.g., in main.dart -> MultiProvider).
-      context.read<BannerProvider>().fetch();
+      context.read<BannerProvider>().loadFromConfigAndFetch();
       context.read<AnnouncementsProvider>().fetch(force: true);
       context.read<RecommendedProvider>().fetch();
       context.read<OtherProvider>().fetch();
@@ -344,6 +344,133 @@ class _AnnouncementStrip extends StatelessWidget {
 }
 
 /// ===================== Banner (API slider) =====================
+// class _ApiHeroCarousel extends StatefulWidget {
+//   const _ApiHeroCarousel({super.key});
+//   @override
+//   State<_ApiHeroCarousel> createState() => _ApiHeroCarouselState();
+// }
+//
+// class _ApiHeroCarouselState extends State<_ApiHeroCarousel> {
+//   late final PageController _controller;
+//   int index = 0;
+//   Timer? _timer;
+//   static const _autoInterval = Duration(seconds: 4);
+//   static const _anim = Duration(milliseconds: 420);
+//
+//   @override
+//   void initState() { super.initState(); _controller = PageController(); _startAuto(); }
+//   void _startAuto() {
+//     _timer?.cancel();
+//     _timer = Timer.periodic(_autoInterval, (_) {
+//       if (!mounted) return;
+//       final len = context.read<BannerProvider>().items.length;
+//       if (len == 0) return;
+//       final next = (index + 1) % len;
+//       _controller.animateToPage(next, duration: _anim, curve: Curves.easeOut);
+//     });
+//   }
+//   void _stopAuto() { _timer?.cancel(); _timer = null; }
+//   @override
+//   void dispose() { _stopAuto(); _controller.dispose(); super.dispose(); }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Consumer<BannerProvider>(
+//       builder: (_, p, __) {
+//         if (p.items.isEmpty) {
+//           return Padding(
+//             padding: const EdgeInsets.symmetric(horizontal: 10),
+//             child: Shimmer(
+//               child: Container(height: 180, decoration: BoxDecoration(color: const Color(0xFFF2F2F7), borderRadius: BorderRadius.circular(12))),
+//             ),
+//           );
+//         }
+//         return Column(
+//           children: [
+//             Listener(
+//               onPointerDown: (_) => _stopAuto(),
+//               onPointerUp: (_) => _startAuto(),
+//               child: SizedBox(
+//                 height: 180,
+//                 child: PageView.builder(
+//                   controller: _controller,
+//                   itemCount: p.items.length,
+//                   onPageChanged: (i) => setState(() => index = i),
+//                   itemBuilder: (_, i) => _BannerSlide(item: p.items[i]),
+//                 ),
+//               ),
+//             ),
+//             const SizedBox(height: 8),
+//             Row(
+//               mainAxisAlignment: MainAxisAlignment.center,
+//               children: List.generate(p.items.length, (i) {
+//                 final active = i == index;
+//                 return AnimatedContainer(
+//                   duration: const Duration(milliseconds: 200),
+//                   margin: const EdgeInsets.symmetric(horizontal: 3),
+//                   height: 6,
+//                   width: active ? 18 : 6,
+//                   decoration: BoxDecoration(
+//                     color: active ? kPink : const Color(0xFFE9E9EF),
+//                     borderRadius: BorderRadius.circular(20),
+//                   ),
+//                 );
+//               }),
+//             )
+//           ],
+//         );
+//       },
+//     );
+//   }
+// }
+//
+// class _BannerSlide extends StatelessWidget {
+//   final BannerItem item;
+//   const _BannerSlide({required this.item});
+//   @override
+//   Widget build(BuildContext context) {
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(horizontal: 10),
+//       child: ClipRRect(
+//         borderRadius: BorderRadius.circular(12),
+//         child: Stack(
+//           fit: StackFit.expand,
+//           children: [
+//             CachedNetworkImage(
+//               imageUrl: item.image,
+//               fit: BoxFit.cover,
+//               placeholder: (_, __) => const _BannerSkeleton(),
+//               errorWidget: (_, __, ___) => const _BannerSkeleton(),
+//             ),
+//             Container(
+//               decoration: BoxDecoration(
+//                 gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight,
+//                   colors: [kPink.withOpacity(0.2), kPink.withOpacity(0.12)],
+//                 ),
+//               ),
+//             ),
+//             if (item.name.isNotEmpty)
+//               Positioned(
+//                 left: 14, bottom: 14, right: 14,
+//                 child: Text(item.name, maxLines: 1, overflow: TextOverflow.ellipsis,
+//                     style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900)),
+//               ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+//
+// class _BannerSkeleton extends StatelessWidget {
+//   const _BannerSkeleton();
+//   @override
+//   Widget build(BuildContext context) => Shimmer(
+//     child: Container(color: const Color(0xFFF2F2F7)),
+//   );
+// }
+
+
 class _ApiHeroCarousel extends StatefulWidget {
   const _ApiHeroCarousel({super.key});
   @override
@@ -358,7 +485,17 @@ class _ApiHeroCarouselState extends State<_ApiHeroCarousel> {
   static const _anim = Duration(milliseconds: 420);
 
   @override
-  void initState() { super.initState(); _controller = PageController(); _startAuto(); }
+  void initState() {
+    super.initState();
+    _controller = PageController();
+    _startAuto();
+
+    // এখানেই provider কে বলছি API কল করতে (txt → body → post)
+    Future.microtask(() {
+      context.read<BannerProvider>().loadFromConfigAndFetch();
+    });
+  }
+
   void _startAuto() {
     _timer?.cancel();
     _timer = Timer.periodic(_autoInterval, (_) {
@@ -369,22 +506,47 @@ class _ApiHeroCarouselState extends State<_ApiHeroCarousel> {
       _controller.animateToPage(next, duration: _anim, curve: Curves.easeOut);
     });
   }
-  void _stopAuto() { _timer?.cancel(); _timer = null; }
+
+  void _stopAuto() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
   @override
-  void dispose() { _stopAuto(); _controller.dispose(); super.dispose(); }
+  void dispose() {
+    _stopAuto();
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<BannerProvider>(
       builder: (_, p, __) {
-        if (p.items.isEmpty) {
+        if (p.loading && p.items.isEmpty) {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Shimmer(
-              child: Container(height: 180, decoration: BoxDecoration(color: const Color(0xFFF2F2F7), borderRadius: BorderRadius.circular(12))),
+            child: Container(
+            height: 180,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF2F2F7),
+              borderRadius: BorderRadius.circular(12),
             ),
+          ),
+        ),
+
+
+        );
+        }
+
+        if (p.items.isEmpty) {
+          return const SizedBox(
+            height: 180,
+            child: Center(child: Text('No slides')),
           );
         }
+
         return Column(
           children: [
             Listener(
@@ -427,6 +589,7 @@ class _ApiHeroCarouselState extends State<_ApiHeroCarousel> {
 class _BannerSlide extends StatelessWidget {
   final BannerItem item;
   const _BannerSlide({required this.item});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -444,16 +607,31 @@ class _BannerSlide extends StatelessWidget {
             ),
             Container(
               decoration: BoxDecoration(
-                gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight,
-                  colors: [kPink.withOpacity(0.2), kPink.withOpacity(0.12)],
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    kPink.withOpacity(0.2),
+                    kPink.withOpacity(0.12),
+                  ],
                 ),
               ),
             ),
             if (item.name.isNotEmpty)
               Positioned(
-                left: 14, bottom: 14, right: 14,
-                child: Text(item.name, maxLines: 1, overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900)),
+                left: 14,
+                bottom: 14,
+                right: 14,
+                child: Text(
+                  item.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
               ),
           ],
         ),
@@ -464,11 +642,21 @@ class _BannerSlide extends StatelessWidget {
 
 class _BannerSkeleton extends StatelessWidget {
   const _BannerSkeleton();
+
   @override
-  Widget build(BuildContext context) => Shimmer(
-    child: Container(color: const Color(0xFFF2F2F7)),
-  );
+  Widget build(BuildContext context) {
+    return Shimmer(
+      child: Container(
+        height: 180,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF2F2F7),
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
+  }
 }
+
 
 /// ===================== App mini grid (API) =====================
 ///
