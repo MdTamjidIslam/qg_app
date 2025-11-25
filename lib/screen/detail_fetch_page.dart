@@ -1,102 +1,24 @@
-// import 'package:flutter/material.dart';
-// import 'package:provider/provider.dart';
-// import '../providers/details_Providers.dart';
-// import 'details_screen.dart'; // <- তোমার আগের DetailPage ফাইল
-//
-// /// Loader page: API থেকে details এনে তারপর DetailPage দেখায়
-// class DetailFetchPage extends StatefulWidget {
-//   final String type;  // e.g. 'recommended' or 'type'
-//   final int index;    // e.g. 0
-//
-//   const DetailFetchPage({super.key, required this.type, required this.index});
-//
-//   @override
-//   State<DetailFetchPage> createState() => _DetailFetchPageState();
-// }
-//
-// class _DetailFetchPageState extends State<DetailFetchPage> {
-//   Future<void>? _job;
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     _job = _load();
-//   }
-//
-//   Future<void> _load() async {
-//     final p = context.read<DetailsProvider>();
-//     final data = await p.fetch(widget.type, widget.index);
-//
-//     // pics থাকলে সেগুলো; নাহলে cover একটা দিলাম
-//     final images = (data.pics.isNotEmpty) ? data.pics : [data.cover];
-//
-//     if (!mounted) return;
-//     Navigator.of(context).pushReplacement(
-//       MaterialPageRoute(
-//         builder: (_) => DetailPage(
-//           title: data.name,
-//           images: images,
-//           description: data.content,
-//           ctaText: ' 点击下载 进入色情专区',
-//           onTapCta: () {
-//             // এখানে তুমি openinstall / লিংক ওপেন করবে
-//             // e.g., launchUrlString(data.androidUrl.isNotEmpty ? data.androidUrl : data.webUrl);
-//           },
-//         ),
-//       ),
-//     );
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     // খুব সিম্পল লোডার/এরর UI
-//     return Scaffold(
-//       body: FutureBuilder<void>(
-//         future: _job,
-//         builder: (context, snap) {
-//           if (snap.connectionState == ConnectionState.waiting) {
-//             return const Center(child: CircularProgressIndicator());
-//           }
-//           if (snap.hasError) {
-//             return Center(
-//               child: Padding(
-//                 padding: const EdgeInsets.all(20),
-//                 child: Text('加载失败：${snap.error}', style: const TextStyle(color: Colors.red)),
-//               ),
-//             );
-//           }
-//           return const SizedBox.shrink(); // pushReplacement হয়ে গেছে
-//         },
-//       ),
-//     );
-//   }
-// }
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../providers/details_Providers.dart';// <-- তোমার দেওয়া ফাইল (DetailsData, DetailsProvider)
+import '../providers/details_Providers.dart'; // <-- উপরের ফাইল
 
-// ===== Optional: তোমার প্রজেক্টে থাকলে এটা মুছে দিও =====
 const kPink = Color(0xFFFF34D3); // fallback primary
 
 /// এখানে তোমার OpenInstall short link বসাও; ফাঁকা রাখতে পারো।
 const String kOpenInstallShortLink = '';
-// উদাহরণ: 'https://o0oi.cn/abcd' বা 'https://o1oi.cn/xxx'
 
 class DetailsPage extends StatefulWidget {
-  final String type;
-  final int index;
+  final int id;        // 👈 শুধু id লাগবে এখন
 
   /// বাটনের টেক্সট কাস্টমাইজ করতে চাইলে
   final String ctaText;
-  /// চাইলে নিজের onTap পাঠাতে পারো; নাহলে ডিফল্ট OpenInstall/target ওপেন হবে
   final VoidCallback? onTapCta;
 
   const DetailsPage({
     super.key,
-    required this.type,
-    required this.index,
+    required this.id,
     this.ctaText = '下载',
     this.onTapCta,
   });
@@ -113,7 +35,7 @@ class _DetailsPageState extends State<DetailsPage> {
   void initState() {
     super.initState();
     _provider = DetailsProvider();
-    _future = _provider.fetch(widget.type, widget.index);
+    _future = _provider.fetchById(widget.id); // 👈 এখানে id দিয়ে call
   }
 
   // ---------- URL helpers ----------
@@ -151,11 +73,11 @@ class _DetailsPageState extends State<DetailsPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('应用详情', style: TextStyle(fontWeight: FontWeight.w700)),
+        title:
+        const Text('应用详情', style: TextStyle(fontWeight: FontWeight.w700)),
         centerTitle: true,
         elevation: 0,
       ),
@@ -169,12 +91,15 @@ class _DetailsPageState extends State<DetailsPage> {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Text('加载失败：${snap.error}',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 14)),
+                child: Text(
+                  '加载失败：${snap.error}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 14),
+                ),
               ),
             );
           }
+
           final d = snap.data!;
           final target = d.androidUrl.isNotEmpty ? d.androidUrl : d.webUrl;
 
@@ -195,10 +120,13 @@ class _DetailsPageState extends State<DetailsPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(d.name,
-                                  style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w800)),
+                              Text(
+                                d.name,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
                               const SizedBox(height: 6),
                               Text(
                                 '首页推荐 · 官网',
@@ -217,9 +145,7 @@ class _DetailsPageState extends State<DetailsPage> {
                     const SizedBox(height: 14),
                     // 简介文字（跟示例一样换行）
                     Text(
-                      d.content.trim().isEmpty
-                          ? '暂无简介'
-                          : d.content,
+                      d.content.trim().isEmpty ? '暂无简介' : d.content,
                       style: const TextStyle(fontSize: 14, height: 1.45),
                     ),
 
@@ -230,16 +156,19 @@ class _DetailsPageState extends State<DetailsPage> {
                     const SizedBox(height: 12),
                     // 图集（横向）
                     if (d.pics.isNotEmpty) ...[
-                      const Text('截图预览',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w800)),
+                      const Text(
+                        '截图预览',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w800),
+                      ),
                       const SizedBox(height: 10),
                       SizedBox(
                         height: 220,
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: d.pics.length,
-                          separatorBuilder: (_, __) => const SizedBox(width: 10),
+                          separatorBuilder: (_, __) =>
+                          const SizedBox(width: 10),
                           itemBuilder: (context, i) =>
                               _GalleryThumb(url: d.pics[i]),
                         ),
@@ -247,9 +176,6 @@ class _DetailsPageState extends State<DetailsPage> {
                     ],
 
                     const SizedBox(height: 18),
-                    // 其他推荐（占位，চাইলে hide করে দাও）
-                    // Text('热门推荐', style: const TextStyle(
-                    //   fontSize: 16, fontWeight: FontWeight.w800)),
                   ],
                 ),
               ),
@@ -269,15 +195,14 @@ class _DetailsPageState extends State<DetailsPage> {
                         height: 50,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: kOpenInstallShortLink.isNotEmpty
-                              ? (kPink) // OpenInstall mood → ব্র্যান্ডেড রঙ
-                              : (kPink),
+                          color: kPink,
                           borderRadius: BorderRadius.circular(28),
                           boxShadow: const [
                             BoxShadow(
-                                color: Color(0x33FF34D3),
-                                blurRadius: 14,
-                                offset: Offset(0, 6)),
+                              color: Color(0x33FF34D3),
+                              blurRadius: 14,
+                              offset: Offset(0, 6),
+                            ),
                           ],
                         ),
                         child: Row(

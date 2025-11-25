@@ -1,14 +1,22 @@
 {
-"banner": {
-"title": "Banner Images",
-"category_id": 20,
-"product_count": 3,
-"product_ids" : [1,2,3,4,5,6]
-},
-"recommended" : {
-"title": "Recomended Products",
-"category_id": 2,
-"product_count": 40,
-"product_ids" : [1,2,3,4,5,6]
-}
+   "recommended" : {
+        "title": "Recomended Products",
+        "category_id": 20,
+        "product_count": 40,
+        "product_ids" : [1,2,3,4,5,6]
+    },
+
+    "banner": {
+        "title": "Banner Images",
+        "category_id": 15,
+        "product_count": 3,
+        "product_ids" : [1,2,3,4,5,6]
+    },
+     "recommended_others" : {
+              "title": "Recomended Others",
+              "category_id": 20,
+              "product_count": 10,
+              "product_ids" : [1,2,3,4,5,6]
+          }
+
 }

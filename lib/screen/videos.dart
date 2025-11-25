@@ -355,7 +355,7 @@ class AppMiniGridFromApi extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => DetailsPage(type: 'recommended', index: i),
+                    builder: (_) => DetailsPage(id: it.id,),
                   ),
                 );
               },
@@ -562,6 +562,7 @@ class OtherSectionFromApi extends StatelessWidget {
                       sub: (p.items[i].slogan.isEmpty ? '私密可靠 · 真实有效' : p.items[i].slogan),
                     ),
                     index: i, // <-- নতুন
+                    id: p.items[i].id, // <-- নতুন
                   ),
                 ),
               ),
@@ -594,8 +595,9 @@ class OtherSectionFromApi extends StatelessWidget {
 class _RecommendedTile extends StatelessWidget {
   final _RecommendItem item;
   final int index; // <-- নতুন
+  final int id; // <-- নতুন
 
-  const _RecommendedTile({required this.item, required this.index});
+  const _RecommendedTile({required this.item, required this.index, required this.id});
 
   @override
   Widget build(BuildContext context) {
@@ -604,7 +606,7 @@ class _RecommendedTile extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => DetailsPage(type: 'other', index: index), // <-- এখানে index
+            builder: (_) => DetailsPage(id: id,), // <-- এখানে index
           ),
         );
       },
@@ -639,7 +641,7 @@ class _RecommendedTile extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => DetailsPage(type: 'other', index: index), // <-- এখানে index
+                    builder: (_) => DetailsPage(id:id ,), // <-- এখানে index
                   ),
                 );
               },

@@ -166,6 +166,109 @@ class BannerProvider extends ChangeNotifier {
   String? get error => _error;
 
   /// public method – বাইরে থেকে শুধু এটাই কল করবে
+  ///
+  ///
+  ///
+  // Future<void> loadFromConfigAndFetch() async {
+  //   if (_loading) return;
+  //   _loading = true;
+  //   _error = null;
+  //   notifyListeners();
+  //
+  //   try {
+  //     // 1) assets থেকে db.txt লোড
+  //     // তোমার ফাইল যদি অন্য path এ থাকে তাহলে এখানে path ঠিক করো
+  //     final txt = await rootBundle.loadString('assets/db.txt');
+  //     final Map<String, dynamic> config =
+  //     jsonDecode(txt) as Map<String, dynamic>;
+  //
+  //     // 2) কোন MAP থেকে category_id ইত্যাদি নেবো?
+  //     Map<String, dynamic> src;
+  //
+  //     // (a) প্রথমে config['banner'] দেখি
+  //     if (config['banner'] is Map<String, dynamic>) {
+  //       src = config['banner'] as Map<String, dynamic>;
+  //     } else {
+  //       // (b) নাহলে config এর ভেতরের প্রথম সেই Map যেটার ভিতরে category_id আছে তাকে নিই
+  //       Map<String, dynamic>? found;
+  //       for (final entry in config.entries) {
+  //         final value = entry.value;
+  //         if (value is Map<String, dynamic> &&
+  //             value.containsKey('category_id')) {
+  //           found = value;
+  //           break;
+  //         }
+  //       }
+  //
+  //       // (c) যদি কিছুই না পাই, তাহলে পুরো config কে use করি
+  //       src = found ?? config;
+  //     }
+  //
+  //     // 3) শুধু এই চারটা ফিল্ড ব্যবহার করবো, বাকি সব ইগনোর
+  //     final payload = {
+  //       'category_id': src['category_id'] ?? 0,
+  //       'product_count': src['product_count'] ?? 0,
+  //       'title': src['title'] ?? 'No data',
+  //       'product_ids': src['product_ids'] is List
+  //           ? src['product_ids']
+  //           : <dynamic>[],
+  //     };
+  //
+  //     if (kDebugMode) {
+  //       print('🔵 Banner payload from db.txt: $payload');
+  //     }
+  //
+  //     // 4) POST API call
+  //     final res = await http
+  //         .post(
+  //       Uri.parse(_api),
+  //       headers: {'Content-Type': 'application/json'},
+  //       body: jsonEncode(payload),
+  //     )
+  //         .timeout(const Duration(seconds: 15));
+  //
+  //     if (kDebugMode) {
+  //       print('🟣 Banner status: ${res.statusCode}');
+  //       // print('🟣 Banner body: ${res.body}');
+  //     }
+  //
+  //     if (res.statusCode != 200) {
+  //       throw 'HTTP ${res.statusCode}';
+  //     }
+  //
+  //     final decoded = jsonDecode(res.body) as Map<String, dynamic>;
+  //
+  //     if (decoded['status'] != true ||
+  //         decoded['data'] == null ||
+  //         decoded['data'] is! Map ||
+  //         decoded['data']['list'] is! List) {
+  //       throw 'Unexpected response format';
+  //     }
+  //
+  //     final List<dynamic> list = decoded['data']['list'] as List<dynamic>;
+  //
+  //     _items
+  //       ..clear()
+  //       ..addAll(
+  //         list
+  //             .whereType<Map<String, dynamic>>()
+  //             .map((e) => BannerItem.fromJson(e))
+  //             .where((e) => e.image.isNotEmpty),
+  //       );
+  //
+  //     if (_items.isEmpty) {
+  //       _error = 'Empty list from API';
+  //     }
+  //   } on TimeoutException {
+  //     _error = 'Request timeout';
+  //   } catch (e) {
+  //     _error = e.toString();
+  //   } finally {
+  //     _loading = false;
+  //     notifyListeners();
+  //   }
+  // }
+
   Future<void> loadFromConfigAndFetch() async {
     if (_loading) return;
     _loading = true;

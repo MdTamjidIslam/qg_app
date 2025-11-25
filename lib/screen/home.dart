@@ -488,6 +488,12 @@ class _ApiHeroCarouselState extends State<_ApiHeroCarousel> {
   void initState() {
     super.initState();
     _controller = PageController();
+    Future.microtask(() {
+      context.read<RecommendedProvider>().fetch();
+    });
+    Future.microtask(() =>
+        context.read<OtherProvider>().fetch());
+
     _startAuto();
 
     // এখানেই provider কে বলছি API কল করতে (txt → body → post)
@@ -601,7 +607,7 @@ class _BannerSlide extends StatelessWidget {
           children: [
             CachedNetworkImage(
               imageUrl: item.image,
-              fit: BoxFit.cover,
+               fit: BoxFit.cover,
               placeholder: (_, __) => const _BannerSkeleton(),
               errorWidget: (_, __, ___) => const _BannerSkeleton(),
             ),
@@ -692,22 +698,22 @@ class AppMiniGridFromApi extends StatelessWidget {
           ),
           itemBuilder: (context, i) {
             final it = p.items[i];
-            final target = it.androidUrl.isNotEmpty ? it.androidUrl : it.webUrl;
+            final id= it.id;
+            final target =
+            it.androidUrl.isNotEmpty ? it.androidUrl : it.webUrl;
 
             return _MiniTile(
               icon: it.img,
               title: it.name,
-              // ইমেজ/টাইটেল ট্যাপ করলে → ডিটেইল ফেচ পেজে index সহ যাবে
               onTapDetail: () {
-                print('clicked kori');
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => DetailsPage(type: 'recommended', index: i),
+                    builder: (_) =>
+                        DetailsPage(id: id),
                   ),
                 );
               },
-              // বাটন ট্যাপ করলে → ওপেন/ডাউনলোড
               onTapDownload: () => _open(target),
             );
           },
@@ -717,11 +723,12 @@ class AppMiniGridFromApi extends StatelessWidget {
   }
 }
 
+
 class _MiniTile extends StatelessWidget {
   final String icon;
   final String title;
-  final VoidCallback? onTapDetail;   // image/title → detail
-  final VoidCallback? onTapDownload; // button → open/download
+  final VoidCallback? onTapDetail;
+  final VoidCallback? onTapDownload;
 
   const _MiniTile({
     required this.icon,
@@ -734,7 +741,6 @@ class _MiniTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // ইমেজে ট্যাপ করলে ডিটেইলে যাবে
         Expanded(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
@@ -744,13 +750,12 @@ class _MiniTile extends StatelessWidget {
                 imageUrl: icon,
                 fit: BoxFit.cover,
                 placeholder: (_, __) => const _RoundedBox(),
-                errorWidget:   (_, __, ___) => const _RoundedBox(),
+                errorWidget: (_, __, ___) => const _RoundedBox(),
               ),
             ),
           ),
         ),
         const SizedBox(height: 4),
-        // টাইটেলেও ট্যাপ করলে ডিটেইল
         GestureDetector(
           onTap: onTapDetail,
           child: Text(
@@ -761,9 +766,8 @@ class _MiniTile extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        // 下载 বাটন → ডাউনলোড/ওপেন
         GestureDetector(
-          onTap: onTapDetail,
+          onTap: onTapDownload,
           child: Container(
             height: 24,
             width: 64,
@@ -775,7 +779,11 @@ class _MiniTile extends StatelessWidget {
             ),
             child: const Text(
               '下载',
-              style: TextStyle(color: kPink, fontWeight: FontWeight.w700, fontSize: 12),
+              style: TextStyle(
+                color: kPink,
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+              ),
             ),
           ),
         ),
@@ -783,6 +791,7 @@ class _MiniTile extends StatelessWidget {
     );
   }
 }
+
 
 /// ===================== Section title =====================
 /// ==== Pink gradient section header with dotted fade (screenshot-style) ====
@@ -939,6 +948,7 @@ class OtherSectionFromApi extends StatelessWidget {
                       sub: (p.items[i].slogan.isEmpty ? '私密可靠 · 真实有效' : p.items[i].slogan),
                     ),
                     index: i, // <-- নতুন
+                    id: p.items[i].id, // <-- নতুন
                   ),
                 ),
               ),
@@ -970,9 +980,10 @@ class OtherSectionFromApi extends StatelessWidget {
 
 class _RecommendedTile extends StatelessWidget {
   final _RecommendItem item;
-  final int index; // <-- নতুন
+  final int index; // <-- নতুন// <-- নতুন
+  final int id; // <-- নতুন// <-- নতুন
 
-  const _RecommendedTile({required this.item, required this.index});
+  const _RecommendedTile({required this.item, required this.index,  required this.id});
 
   @override
   Widget build(BuildContext context) {
@@ -981,7 +992,7 @@ class _RecommendedTile extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => DetailsPage(type: 'other', index: index), // <-- এখানে index
+            builder: (_) => DetailsPage(id: id), // <-- এখানে index
           ),
         );
       },
@@ -1016,7 +1027,7 @@ class _RecommendedTile extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => DetailsPage(type: 'other', index: index), // <-- এখানে index
+                    builder: (_) => DetailsPage(id: id,), // <-- এখানে index
                   ),
                 );
               },

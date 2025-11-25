@@ -39,6 +39,7 @@ dependencies:
   cached_network_image: ^3.3.1
   url_launcher: ^6.3.0
   openinstall_flutter_plugin: ^2.5.6
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:
